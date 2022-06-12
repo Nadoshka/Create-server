@@ -39,6 +39,10 @@ app.post('/user/create', (req, res) => {
     if(typeof user.name !== "string" || typeof user.age !== "number") {
         res.status(400).json('Invalid type');
     }
+
+    if(user.age <= 0) {
+        res.status(400).json('Invalid age value');
+    }
     
     fs.readFile(path.join(process.cwd(), 'users.json'), (err, data) => {
         if (err) {
@@ -50,7 +54,9 @@ app.post('/user/create', (req, res) => {
         const stringifiedData = JSON.stringify({users: users}, null, 2);
 
         fs.writeFile('users.json', stringifiedData, (err) => {
-            if (err) throw err;
+            if (err) {
+                res.status(500).text('Could not store data')    
+            };
             console.log('The file has been saved!');
         });
 
