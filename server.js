@@ -9,11 +9,7 @@ const app = express();
 
 app.use(cors())
 app.use(bodyParser.json())
-/**
- * app
- * ||
- * / fn(req, res)
- */
+
 app.get('/user', (req, res) => {
     const {userId} = req.body;
     if(!userId || typeof userId !== 'string' || userId.length < 1 ) {
@@ -31,35 +27,36 @@ app.get('/user', (req, res) => {
        } else {
            res.status(404).json('user not found');
        }
-    })
+    });
 });
 
 app.post('/user/create', (req, res) => {
     const {user} = req.body;
-    if(!user.name || user.age ) {
+
+    if(!user.name || !user.age ) {
         res.status(400).json('missing data');
     }
-    if(typeof user.name !== string || typeof user.age !== number) {
+    if(typeof user.name !== "string" || typeof user.age !== "number") {
         res.status(400).json('Invalid type');
     }
     
     fs.readFile(path.join(process.cwd(), 'users.json'), (err, data) => {
-    if (err) {
-        res.status(500).text('Could not read database') 
-    };
+        if (err) {
+            res.status(500).text('Could not read database') 
+        };
+        const {users} = JSON.parse(data);
+        users.push({...user, id: `${users.length + 1}`});
 
-    data.push(user);
+        const stringifiedData = JSON.stringify({users: users}, null, 2);
 
-    //look at the syntax what should the first argument be?
-    fs.writeFile('users.json', data, (err) => {
-        if (err) throw err;
-        console.log('The file has been saved!');
-    })
-    const {users} = JSON.parse(data);
-})
-})
+        fs.writeFile('users.json', stringifiedData, (err) => {
+            if (err) throw err;
+            console.log('The file has been saved!');
+        });
 
-
+        res.send('User is stored!');
+    });
+});
 
 app.listen(PORT, () => {
     console.log('Server is running at:', PORT )
